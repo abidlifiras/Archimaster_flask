@@ -75,10 +75,45 @@ class ContactApplication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
     application_id = db.Column(db.Integer, db.ForeignKey('applications.id'))
+    
+class Assessment(db.Model):
+    __tablename__ = 'assessments'
+    id = db.Column(db.Integer, primary_key=True)
+    Assessment = db.Column(db.String(255))
+    note = db.Column(db.String(255))
+    
+class AssessmentResponse(db.Model):
+    __tablename__ = 'assessment_response'
+    id = db.Column(db.Integer, primary_key=True)
+    app_id = db.Column(db.Integer)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
+    response = db.Column(db.String(255))
 
+class Category(db.Model):
+    __tablename__ = 'categories'
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(255))
+    questions = db.relationship('Question', backref='category')
+
+class Option(db.Model):
+    __tablename__ = 'options'
+    id = db.Column(db.Integer, primary_key=True)
+    option = db.Column(db.String(255))
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    question = db.Column(db.String(255))
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
+    
+class Step(db.Model):
+    __tablename__ = 'steps'
+    id = db.Column(db.Integer, primary_key=True)
+    step = db.Column(db.String(255))
         
 
-@app.route('api/v1/generate_report/<int:app_id>', methods=['GET'])
+@app.route('/api/v1/generate_report/<int:app_id>', methods=['GET'])
 def generate_report(app_id):
     table_style=[('ALIGN',(1,1),(-2,-2),'RIGHT'),
                        ('TEXTCOLOR',(1,1),(-2,-2),colors.white),
@@ -92,6 +127,7 @@ def generate_report(app_id):
                        ]
     
     app_data = Application.query.filter_by(id=app_id).first()
+    AssessmentResponseList=AssessmentResponse.query.filter_by(id=app_id)
     server_data = Server.query.join(ServerApplication).join(Application).filter(Application.id == app_id).all()
     db_data = Database.query.join(ServerDatabase).join(Server).join(ServerApplication).join(Application).filter(Application.id == app_id).all()
     contact_data = Contact.query.join(ContactApplication).join(Application).filter(Application.id == app_id).all()
@@ -99,25 +135,25 @@ def generate_report(app_id):
     styles = getSampleStyleSheet()
     style_title = styles["Title"]
     style_body = styles["BodyText"]
-    elements.append(Paragraph("RAPPORT POUR L'APPLICATION {}".format(app_data.app_name.upper()), style_title))
+    elements.append(Paragraph("Rapport For Application {}".format(app_data.app_name.upper()), style_title))
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Description de l'application : {}".format(app_data.app_description), style_body))
+    elements.append(Paragraph("Description  : {}".format(app_data.app_description), style_body))
     buffer = BytesIO()
     # Servers table
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Serveurs :", style_body))
+    elements.append(Paragraph("Servers :", style_body))
     if server_data:
-        server_table_data = [['Nom du serveur', 'Adresse IP', 'Système d\'exploitation']]
+        server_table_data = [['Server Name', 'Adresse IP', 'Operating Sysytem']]
         for server in server_data:
             server_table_data.append([server.server_name, server.ip_address, server.operating_system])
         server_table = Table(server_table_data)
         server_table.setStyle(TableStyle(table_style))
         elements.append(server_table)   
     else:
-        elements.append(Paragraph("Aucun serveur trouvé ", style_body))
+        elements.append(Paragraph("No Servers found" , style_body))
 
     elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Bases de données :", style_body))
+    elements.append(Paragraph("Databases :", style_body))
         # BD table
     if db_data:
         db_table_data = [['Nom du Database', 'Version']]
@@ -128,23 +164,33 @@ def generate_report(app_id):
 
         elements.append(db_table)
     else:
-        elements.append(Paragraph("Aucun Database trouvé.", style_body))
+        elements.append(Paragraph("No Databases found", style_body))
         
     
     elements.append(Spacer(1, 12))
     elements.append(Paragraph("Contacts :", style_body))
            # contact table
     if contact_data:
-        contact_table_data = [['Nom complet', 'Email ','Département']]
+        contact_table_data = [['Full Name', 'Email ','Department']]
         for contact in contact_data:
             contact_table_data.append([contact.full_name, contact.email,contact.department])
         contact_table = Table(contact_table_data)
         contact_table.setStyle(TableStyle(table_style))
         elements.append(contact_table)
 
+    else:
+        elements.append(Paragraph("No Contacts found", style_body))
+        
+    if AssessmentResponseList :
+        AssessmentResponse_Table_data = [['Question Id', 'Response']]
+        for assessmentResponse in AssessmentResponseList:
+            AssessmentResponse_Table_data.append([assessmentResponse.question_id, assessmentResponse.response])
+        assessmentResponse_table = Table(AssessmentResponse_Table_data)
+        assessmentResponse_table.setStyle(TableStyle(table_style))
+        elements.append(assessmentResponse_table)
 
     else:
-        elements.append(Paragraph("Aucun Contact trouvé.", style_body))
+        elements.append(Paragraph("No Response for this application found", style_body))
         
     pdf = SimpleDocTemplate(buffer)
     pdf.build(elements)
@@ -165,7 +211,7 @@ def generate_report(app_id):
 
 
 
-@app.route('api/v1/upload', methods=['POST'])
+@app.route('/api/v1/upload', methods=['POST'])
 def upload_excel():
     files = request.files.getlist('file')   
     return storeExcel(files)    
