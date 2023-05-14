@@ -1,212 +1,95 @@
-from io import BytesIO
-import os
-from flask import Flask, make_response, request
-from reportlab.pdfgen import canvas
-from reportlab.lib.styles import getSampleStyleSheet
-from flask_sqlalchemy import SQLAlchemy
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from flask import Flask, make_response, request, send_file
+import requests
 from Service.UploadExcel import storeExcel
 from flask_cors import CORS
-
+from docx import Document
+from docxtpl import DocxTemplate
+from docx2pdf import convert
+import os
+import comtypes.client
+import docx
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:firas@localhost/cra'
-db = SQLAlchemy(app)
 CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-
-class Application(db.Model):
-    __tablename__ = 'applications'
-    id = db.Column(db.Integer, primary_key=True)
-    app_name = db.Column(db.String(255))
-    app_description = db.Column(db.String(255))
-    server = db.relationship('Server', secondary='server_application', backref='app_servers')
-    
-
-
-
-class Server(db.Model):
-    __tablename__ = 'servers'
-    id = db.Column(db.Integer, primary_key=True)
-    server_name = db.Column(db.String(255))
-    ip_address = db.Column(db.String(255))
-    operating_system = db.Column(db.String(255))
-    applications = db.relationship('Application',secondary='server_application',backref=db.backref('server_apps', lazy=True))    
-    databases = db.relationship('Database',secondary='server_database',backref=db.backref('server_Db', lazy=True))    
-
-
-class Database(db.Model):
-    __tablename__ = 'base_de_donnee'
-    database_id = db.Column(db.Integer, primary_key=True)
-    database_name = db.Column(db.String(255))
-    database_version = db.Column(db.String(255))
-    servers = db.relationship('Server', secondary='server_database', backref='Db_servers')
-
-
-class Contact(db.Model):
-    __tablename__ = 'contacts'
-    id = db.Column(db.Integer, primary_key=True)
-    full_name = db.Column(db.String(255))
-    email = db.Column(db.String(255))
-    department = db.Column(db.String(255))
-    applications = db.relationship('Application', secondary='application_contact', backref='contacts')
-
-
-class ServerApplication(db.Model):
-    __tablename__ = 'server_application'
-    id = db.Column(db.Integer, primary_key=True)
-    server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
-    application_id = db.Column(db.Integer, db.ForeignKey('applications.id'))
-
-
-class ServerDatabase(db.Model):
-    __tablename__ = 'server_database'
-    id = db.Column(db.Integer, primary_key=True)
-    server_id = db.Column(db.Integer, db.ForeignKey('servers.id'))
-    database_id = db.Column(db.Integer, db.ForeignKey('base_de_donnee.database_id'))
-
-
-class ContactApplication(db.Model):
-    __tablename__ = 'application_contact'
-    id = db.Column(db.Integer, primary_key=True)
-    contact_id = db.Column(db.Integer, db.ForeignKey('contacts.id'))
-    application_id = db.Column(db.Integer, db.ForeignKey('applications.id'))
-    
-class Assessment(db.Model):
-    __tablename__ = 'assessments'
-    id = db.Column(db.Integer, primary_key=True)
-    Assessment = db.Column(db.String(255))
-    note = db.Column(db.String(255))
-    
-class AssessmentResponse(db.Model):
-    __tablename__ = 'assessment_response'
-    id = db.Column(db.Integer, primary_key=True)
-    app_id = db.Column(db.Integer)
-    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
-    response = db.Column(db.String(255))
-
-class Category(db.Model):
-    __tablename__ = 'categories'
-    id = db.Column(db.Integer, primary_key=True)
-    category = db.Column(db.String(255))
-    questions = db.relationship('Question', backref='category')
-
-class Option(db.Model):
-    __tablename__ = 'options'
-    id = db.Column(db.Integer, primary_key=True)
-    option = db.Column(db.String(255))
-    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'))
-
-class Question(db.Model):
-    __tablename__ = 'questions'
-    id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(255))
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'))
-    
-class Step(db.Model):
-    __tablename__ = 'steps'
-    id = db.Column(db.Integer, primary_key=True)
-    step = db.Column(db.String(255))
-        
-
 @app.route('/api/v1/generate_report/<int:app_id>', methods=['GET'])
 def generate_report(app_id):
-    table_style=[('ALIGN',(1,1),(-2,-2),'RIGHT'),
-                       ('TEXTCOLOR',(1,1),(-2,-2),colors.white),
-                       ('VALIGN',(0,0),(0,-1),'TOP'),
-                       ('TEXTCOLOR',(0,0),(0,-1),colors.black),
-                       ('ALIGN',(0,-1),(-1,-1),'CENTER'),
-                       ('VALIGN',(0,-1),(-1,-1),'MIDDLE'),
-                       ('TEXTCOLOR',(0,-1),(-1,-1),colors.black),
-                       ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
-                       ('BOX', (0,0), (-1,-1), 0.25, colors.black),
-                       ]
-    
-    app_data = Application.query.filter_by(id=app_id).first()
-    AssessmentResponseList=AssessmentResponse.query.filter_by(id=app_id)
-    server_data = Server.query.join(ServerApplication).join(Application).filter(Application.id == app_id).all()
-    db_data = Database.query.join(ServerDatabase).join(Server).join(ServerApplication).join(Application).filter(Application.id == app_id).all()
-    contact_data = Contact.query.join(ContactApplication).join(Application).filter(Application.id == app_id).all()
-    elements = []
-    styles = getSampleStyleSheet()
-    style_title = styles["Title"]
-    style_body = styles["BodyText"]
-    elements.append(Paragraph("Rapport For Application {}".format(app_data.app_name.upper()), style_title))
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Description  : {}".format(app_data.app_description), style_body))
-    buffer = BytesIO()
-    # Servers table
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Servers :", style_body))
-    if server_data:
-        server_table_data = [['Server Name', 'Adresse IP', 'Operating Sysytem']]
-        for server in server_data:
-            server_table_data.append([server.server_name, server.ip_address, server.operating_system])
-        server_table = Table(server_table_data)
-        server_table.setStyle(TableStyle(table_style))
-        elements.append(server_table)   
-    else:
-        elements.append(Paragraph("No Servers found" , style_body))
+    url = f'http://127.0.0.1:8080/api/v1/applications/{app_id}'
+    response = requests.get(url)
+    if response.status_code == 200:
+        variables_json = response.json()
+    url_assessment = f'http://127.0.0.1:8080/api/v1/applications/{app_id}/assessment'
+    response1 = requests.get(url_assessment)
+    if response.status_code == 200:
+        variables_json1 = response1.json()
 
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Databases :", style_body))
-        # BD table
-    if db_data:
-        db_table_data = [['Nom du Database', 'Version']]
-        for db in db_data:
-            db_table_data.append([db.database_name, db.database_version])
-        db_table = Table(db_table_data)
-        db_table.setStyle(TableStyle(table_style))
+    comtypes.CoInitialize()
+    doc = DocxTemplate("./Ressources/template_v2.docx")
 
-        elements.append(db_table)
-    else:
-        elements.append(Paragraph("No Databases found", style_body))
-        
-    
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph("Contacts :", style_body))
-           # contact table
-    if contact_data:
-        contact_table_data = [['Full Name', 'Email ','Department']]
-        for contact in contact_data:
-            contact_table_data.append([contact.full_name, contact.email,contact.department])
-        contact_table = Table(contact_table_data)
-        contact_table.setStyle(TableStyle(table_style))
-        elements.append(contact_table)
+    context = {
+        'client':variables_json['appName'],
+        'description': variables_json['appDescription'],
+        'name': variables_json['appName'],
+        'Contacts': [
+        {
+            'fullName': contact['fullName'],
+            'title': contact['title'],
+            'department': contact['department'],  # Remplacez 'N/A' par le champ de téléphone approprié
+            'email': contact['email']
+        }
+        for contact in variables_json['contacts']
+    ],
+    'steps': [
+        {
+            'id': step['id'],
+            'step': step['step'],
+            'categories': [
+                {
+                    'id': category['id'],
+                    'category': category['category'],
+                    'createdAt': category['createdAt'],
+                    'deletedAt': category['deletedAt'],
+                    'modifiedAt': category['modifiedAt'],
+                    'questions': [
+                        {
+                            'id': question['id'],
+                            'required': question['required'],
+                            'question': question['question'],
+                            'deletedAt': question['deletedAt'],
+                            'modifiedAt': question['modifiedAt'],
+                            'createdAt': question['createdAt'],
+                            'type': question['type'],
+                            'options': [
+                                {
+                                    'id': option['id'],
+                                    'isActive': option['isActive'],
+                                    'option': option['option'],
+                                    'deletedAt': option['deletedAt'],
+                                    'modifiedAt': option['modifiedAt'],
+                                    'createdAt': option['createdAt']
+                                }
+                                for option in question['options']
+                            ],
+                            'response': question['response']
+                        }
+                        for question in category['questions']
+                    ]
+                }
+                for category in step['categories']
+            ]
+        }
+        for step in variables_json1['steps']
+    ]
+}
 
-    else:
-        elements.append(Paragraph("No Contacts found", style_body))
-        
-    if AssessmentResponseList :
-        AssessmentResponse_Table_data = [['Question Id', 'Response']]
-        for assessmentResponse in AssessmentResponseList:
-            AssessmentResponse_Table_data.append([assessmentResponse.question_id, assessmentResponse.response])
-        assessmentResponse_table = Table(AssessmentResponse_Table_data)
-        assessmentResponse_table.setStyle(TableStyle(table_style))
-        elements.append(assessmentResponse_table)
 
-    else:
-        elements.append(Paragraph("No Response for this application found", style_body))
-        
-    pdf = SimpleDocTemplate(buffer)
-    pdf.build(elements)
-    
-    buffer.seek(0)
-    pdf_data = buffer.getvalue()
+    doc.render(context)
+    doc.save("document_rempli.docx")
 
-    response = make_response(pdf_data)
+    return variables_json
 
-    # Définir les en-têtes pour indiquer qu'il s'agit d'un fichier PDF
-    response.headers['Content-Type'] = 'application/pdf'
-    response.headers['Content-Disposition'] = 'attachment; filename=report2.pdf'
-    file_path = os.path.join(os.getcwd(), 'report.pdf')
-    with open(file_path, 'wb') as f:
-        f.write(buffer.getvalue())
-    return response
+
 
 
 
