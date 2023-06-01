@@ -9,9 +9,9 @@ from docx2pdf import convert
 import os
 import comtypes.client
 import docx
+import Service.Scoring as scoring
 
 app = Flask(__name__)
-CORS(app)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 def generate_relation_image(application_id, data):
@@ -183,7 +183,9 @@ def generate_report(app_id,type):
     return response
 
 
-
+@app.route('/api/v1/strategy/<int:app_id>', methods=['POST'])
+def get_strategies(app_id): 
+    return scoring.calculate_scores(app_id)   
 
 
 

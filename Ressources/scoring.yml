@@ -1,0 +1,834 @@
+- question_id: 1
+  labels:
+    - label: revise
+      risk: 3
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 2
+      benefit: 17
+      effort: 2
+    - label: rehost
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 2
+  labels:
+    - label: revise
+      risk: 4
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: rehost
+      risk: 3
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 2
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: remain
+      risk: 2
+      benefit: 2
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 3
+      effort: 3
+
+- question_id: 3
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 3
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 1
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 2
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+
+- question_id: 4
+  labels:
+    - label: revise
+      risk: 3
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 2
+      benefit: 4
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 3
+      effort: 3
+
+- question_id: 5
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 6
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 7
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+
+- question_id: 8
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 9
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 10
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 11
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+
+- question_id: 12
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 13
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 14
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 15
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+- question_id: 16
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 17
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 18
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 19
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+
+- question_id: 20
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 21
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 22
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 23
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
+- question_id: 24
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 3
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 2
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 4
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 1
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 1
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 25
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 1
+      effort: 4
+    - label: retain
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 2
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 2
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 3
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 4
+      effort: 3
+
+- question_id: 26
+  labels:
+    - label: revise
+      risk: 1
+      benefit: 4
+      effort: 2
+    - label: retain
+      risk: 2
+      benefit: 3
+      effort: 4
+    - label: rehost
+      risk: 3
+      benefit: 1
+      effort: 3
+    - label: rebuild
+      risk: 4
+      benefit: 3
+      effort: 3
+    - label: rearchitect
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: remain
+      risk: 1
+      benefit: 1
+      effort: 2
+    - label: replace
+      risk: 3
+      benefit: 2
+      effort: 4
+
+- question_id: 27
+  labels:
+    - label: revise
+      risk: 2
+      benefit: 2
+      effort: 3
+    - label: retain
+      risk: 3
+      benefit: 1
+      effort: 2
+    - label: rehost
+      risk: 1
+      benefit: 3
+      effort: 4
+    - label: rebuild
+      risk: 4
+      benefit: 4
+      effort: 3
+    - label: rearchitect
+      risk: 3
+      benefit: 3
+      effort: 2
+    - label: remain
+      risk: 1
+      benefit: 4
+      effort: 1
+    - label: replace
+      risk: 2
+      benefit: 1
+      effort: 3
