@@ -1,13 +1,12 @@
-from flask import send_file
-import numpy as np
 import pandas as pd
+import numpy as np
 from sqlalchemy import create_engine
-import matplotlib.pyplot as plt
-from scipy.spatial.distance import cdist
-
 import yaml
+from sklearn import preprocessing
+from flask import send_file
+import matplotlib.pyplot as plt
 
-def calculate_scores(app_id):
+def calculate_scores(app_id, detailed):
     engine = create_engine('mysql+pymysql://root:firas@localhost/cra')
     df_assessment_response = pd.read_sql_table('assessment_response', engine)
 
@@ -15,68 +14,70 @@ def calculate_scores(app_id):
         data = yaml.safe_load(file)
 
     filtered_df = df_assessment_response.loc[df_assessment_response['app_id'] == app_id]
-    question_ids_yml = [int(entry['question_id']) for entry in data]
-    filtered_df = filtered_df[filtered_df['question_id'].isin(question_ids_yml)]
+    df_options = pd.read_sql_table('options', engine)
+    list_id_options=[]
+    for index, row in filtered_df.iterrows():
+        for _, df_op in df_options.iterrows():
+            if row['response'] == df_op['option']:
+                 list_id_options.append(df_op['id'])
 
-    label_scores = {}
-    for _, row in filtered_df.iterrows():
-        question_id = int(row['question_id'])
-        labels = data[question_id-1]['labels']
-        for label in labels:
-            label_name = label['label']
-            risk = label['risk']
-            benefit = label['benefit']
-            effort = label['effort']
+    labels = ['revise','retain','rehost','rebuild','rearchitect','remain','replace']
+    vectors = ['benefit', 'effort', 'risk']
+    matrix = pd.DataFrame(0, index=labels, columns=vectors)
+    label_descriptions = {
+        "revise": "The 'revise' migration strategy involves making significant modifications or adjustments to the existing system before migrating it to the cloud.",
+        "retain": "The 'retain' migration strategy focuses on keeping the current system as it is, without any significant changes, while moving it to the cloud infrastructure.",
+        "rehost": "The 'rehost' migration strategy, also known as 'lift and shift,' involves moving the existing system to the cloud without making significant changes to its architecture.",
+        "rebuild": "The 'rebuild' migration strategy entails rebuilding the system from scratch using cloud-native technologies and architectures.",
+        "rearchitect": "The 'rearchitect' migration strategy involves making significant architectural changes to the system to optimize it for cloud environments.",
+        "remain": "The 'remain' migration strategy refers to keeping the system in its current state without migrating it to the cloud.",
+        "replace": "The 'replace' migration strategy involves replacing the existing system with a new system or solution in the cloud."
+    }
+    
+    for question_entry in data:
+        option_id = question_entry['option_id']
+        if option_id in list_id_options :
+            for label_entry in question_entry['labels']:
+                label = label_entry['label']
+                for vector in vectors:
+                    weight = label_entry[vector]
+                    matrix.loc[label, vector] += weight
 
-            if label_name not in label_scores:
-                label_scores[label_name] = {'risk': [], 'benefit': [], 'effort': []}
+    normalized_matrix = preprocessing.normalize(matrix, norm='l2', axis=0)
+    criteria = [0.6, -0.5,-0.4 ]
+    weighted_normalized_matrix = normalized_matrix * criteria
+    ideal_best = np.max(weighted_normalized_matrix, axis=0)
+    ideal_worst = np.min(weighted_normalized_matrix, axis=0)
+    distance_best = np.sqrt(np.sum((weighted_normalized_matrix - ideal_best) ** 2, axis=1))
+    distance_worst = np.sqrt(np.sum((weighted_normalized_matrix - ideal_worst) ** 2, axis=1))
+    scores = distance_worst / (distance_worst + distance_best)
+    
+    recommended_label = labels[np.argmax(scores)]
+    
+    if detailed == 1:
+        plt.figure()
+        colors = plt.cm.viridis(scores)  # Utilisation de la palette de couleurs viridis
+        plt.bar(labels, scores, color=colors)
+        plt.xlabel('Strategies')
+        plt.ylabel('Scores')
+        plt.title(f'Recommended strategy : {recommended_label}')
+        plt.xticks(rotation='vertical')
+        plt.tight_layout()  # Ajustement automatique des marges
+        image_path = f"application{app_id}.png"
+        plt.savefig(image_path)
+        
+        return send_file(image_path, mimetype='image/png')
+    if detailed==2 :
+        plt.figure()
+        colors = plt.cm.viridis(scores)  # Utilisation de la palette de couleurs viridis
+        plt.bar(labels, scores, color=colors)
+        plt.xlabel('Strategies')
+        plt.ylabel('Scores')
+        plt.title(f'Recommended strategy : {recommended_label}')
+        plt.xticks(rotation='vertical')
+        plt.tight_layout()  # Ajustement automatique des marges
+        image_path = f"application{app_id}.png"
+        plt.savefig(image_path)
+        return({recommended_label:label_descriptions[recommended_label]},image_path)
 
-            label_scores[label_name]['risk'].append(risk)
-            label_scores[label_name]['benefit'].append(benefit)
-            label_scores[label_name]['effort'].append(effort)
-
-    selected_label = None
-    max_benefit = -1
-    min_effort = float('inf')
-    min_risk = float('inf')
-
-    for label, scores in label_scores.items():
-        risks = scores['risk']
-        benefits = scores['benefit']
-        efforts = scores['effort']
-
-        if max(benefits) > max_benefit or (max(benefits) == max_benefit and min(efforts) < min_effort) or (max(benefits) == max_benefit and min(efforts) == min_effort and min(risks) < min_risk):
-            selected_label = label
-            max_benefit = max(benefits)
-            min_effort = min(efforts)
-            min_risk = min(risks)
-
-    selected_label_scores = pd.DataFrame(label_scores[selected_label])
-
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    axes = axes.flatten()
-
-    combinations = [('effort', 'benefit'), ('benefit', 'risk'), ('risk', 'effort')]
-    top_categories = sorted(label_scores, key=lambda x: max(label_scores[x]['benefit']), reverse=True)[:3]
-    colors = ['red', 'green', 'blue']
-
-    for i, ax in enumerate(axes):
-        x_label, y_label = combinations[i]
-        ax.set_xlabel(x_label.capitalize())
-        ax.set_ylabel(y_label.capitalize())
-        ax.set_title(selected_label)
-
-        for label, scores in label_scores.items():
-            x_values = np.array(scores[x_label])
-            y_values = np.array(scores[y_label])
-
-            if label == selected_label:
-                ax.scatter(np.mean(x_values), np.mean(y_values), c='red', label=label, marker='o')
-
-        ax.legend()
-
-    plt.tight_layout()
-    image_path = f"application{app_id}.png"
-    plt.savefig(image_path)
-
-    return send_file(image_path, mimetype='image/png')
+    return {recommended_label:label_descriptions[recommended_label]}

@@ -1,7 +1,7 @@
 from flask import Flask, make_response, request, send_file
 import matplotlib.pyplot as plt
 import requests
-from Service.UploadExcel import storeExcel
+from Service.UploadExcel import store_excel
 from flask_cors import CORS
 from docx import Document
 from docxtpl import DocxTemplate ,InlineImage
@@ -10,64 +10,11 @@ import os
 import comtypes.client
 import docx
 import Service.Scoring as scoring
+import Service.ImageInterface as imageInterface
+import Service.ImageInterface as ImageInterface
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-def generate_relation_image(application_id, data):
-    application = None
-    for item in data:
-        if item["applicationSrc"]["id"] == application_id or item["applicationTarget"]["id"] == application_id:
-            application = item
-            break
-
-    if application is None:
-        return None
-
-    applications = set()
-    for item in data:
-        applications.add(item["applicationSrc"]["appName"])
-        applications.add(item["applicationTarget"]["appName"])
-
-    positions = {}
-    angle = 0
-    angle_increment = 2 * 3.14159 / len(applications)
-
-    for app in applications:
-        x = 0.5 + 0.4 * (angle / (2 * 3.14159))
-        y = 0.5 + 0.4 * (angle / (2 * 3.14159))
-        positions[app] = (x, y)
-        angle += angle_increment
-
-    fig, ax = plt.subplots()
-
-    for item in data:
-        src_app = item["applicationSrc"]["appName"]
-        target_app = item["applicationTarget"]["appName"]
-        src_pos = positions[src_app]
-        target_pos = positions[target_app]
-
-        if item["flow"] == "INTERNAL":
-            arrow_color = 'green'
-        else:
-            arrow_color = 'red'
-
-        ax.text(src_pos[0], src_pos[1], f'{src_app}\nProtocol: {item["protocol"]}', color='black', ha='center', va='center')
-
-        ax.arrow(src_pos[0], src_pos[1], target_pos[0] - src_pos[0], target_pos[1] - src_pos[1], color=arrow_color, head_width=0.02)
-
-    for app, pos in positions.items():
-        circle = plt.Circle(pos, 0.05, color='orange')
-        ax.add_artist(circle)
-
-    ax.set_xlim([0, 1])
-    ax.set_ylim([0, 1])
-    ax.axis('off')
-
-    image_path = f'relations_{application_id}.png'
-    plt.savefig(image_path)
-
-    return image_path
 
 
 @app.route('/api/v1/generate_report/<int:app_id>/<string:type>', methods=['GET'])
@@ -80,11 +27,13 @@ def generate_report(app_id,type):
     response1 = requests.get(url_assessment)
     if response.status_code == 200:
         variables_json1 = response1.json()
-    response = requests.get(f'http://127.0.0.1:8080/api/v1/interfaces')
+    url_interfaces = f'http://127.0.0.1:8080/api/v1/applications/{app_id}/interfaces'
+    response2 = requests.get(url_interfaces)
     if response.status_code == 200:
-        data = response.json()
+        variables_json2 = response2.json()
 
-    image_path = generate_relation_image(app_id, data)
+    image_path = imageInterface.get_interface(app_id)
+    (jsonStrategie,image_path_strategie)=scoring.calculate_scores(app_id,2)
 
     comtypes.CoInitialize()
     doc = DocxTemplate("./Ressources/template_v2.docx")
@@ -105,7 +54,22 @@ def generate_report(app_id,type):
         'client':variables_json['appName'],
         'description': variables_json['appDescription'],
         'name': variables_json['appName'],
-        'relations_image':InlineImage(doc, 'relations_102.png'),
+        'strategy':list(jsonStrategie.keys())[0],
+        'detailed_startegy':list(jsonStrategie.values())[0],
+        'migration_image':InlineImage(doc, image_path_strategie),        
+        'relations_image':InlineImage(doc, image_path),        
+        'interfaces': [
+        {
+            "source_name": interface['applicationSrc']['appName'],
+            "target_name":  interface['applicationTarget']['appName'],
+            "protocol": interface['protocol'],
+            "internalOrExternal": interface['flow'],
+            "batchOrRealTime":  interface['processingMode'],
+            "frequency": interface['frequency'],
+
+        }
+        for interface in variables_json2
+    ],
 
 
         'servers': [
@@ -183,16 +147,26 @@ def generate_report(app_id,type):
     return response
 
 
-@app.route('/api/v1/strategy/<int:app_id>', methods=['POST'])
-def get_strategies(app_id): 
-    return scoring.calculate_scores(app_id)   
+@app.route('/api/v1/strategy/<int:app_id>/<string:type>', methods=['GET'])
+def get_strategies(app_id,type):
+    if type=="detailed" :
+        return scoring.calculate_scores(app_id,1)
+    else :
+        return scoring.calculate_scores(app_id,0)
+    
+@app.route('/api/v1/interface/<int:app_id>', methods=['GET'])
+def get_imageInterface(app_id):
+    image_path=ImageInterface.get_interface(app_id)
+    return send_file(image_path, mimetype='image/png')
+
+ 
 
 
 
 @app.route('/api/v1/upload', methods=['POST'])
 def upload_excel():
     files = request.files.getlist('file')   
-    return storeExcel(files)    
+    return store_excel(files)    
 
 
 #-------------------------------------------------------------------------
