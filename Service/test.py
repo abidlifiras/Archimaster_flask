@@ -1,8 +1,21 @@
-import json
-import Scoring as scoring
+import pandas as pd
+import numpy as np
 
-(jsonStrategie,image_path_strategie)=scoring.calculate_scores(152,2)
+# Créer un DataFrame aléatoire pour chaque vecteur
+labels = ['revise', 'retain', 'rehost', 'rebuild', 'rearchitect', 'remain', 'replace']
+vectors = ['benefit', 'risk', 'effort']
+num_options = 145
 
-key = list(jsonStrategie.keys())[0]
-value = list(jsonStrategie.values())[0]
-print((key,value))
+data = np.random.randint(1, 4, size=(len(labels), num_options))
+df_benefit = pd.DataFrame(data, index=labels, columns=range(1, num_options + 1))
+df_risk = pd.DataFrame(data, index=labels, columns=range(1, num_options + 1))
+df_effort = pd.DataFrame(data, index=labels, columns=range(1, num_options + 1))
+
+# Créer un fichier Excel et écrire les DataFrames dans les feuilles de calcul correspondantes
+excel_file = 'Ressources/score.xlsx'
+with pd.ExcelWriter(excel_file) as writer:
+    df_benefit.to_excel(writer, sheet_name='benefit')
+    df_risk.to_excel(writer, sheet_name='risk')
+    df_effort.to_excel(writer, sheet_name='effort')
+
+print("Le fichier Excel a été créé avec succès.")

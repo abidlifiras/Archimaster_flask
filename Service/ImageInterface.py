@@ -19,24 +19,17 @@ def get_interface(app_id):
     for relation in data:
         source_app_id = relation['applicationSrc']['id']
         target_app_id = relation['applicationTarget']['id']
-        flow = relation['flow']
+        protocol = relation['protocol']
         if target_app_id == app_id:
             source_app_name = relation['applicationSrc']['appName']
             G.add_node(source_app_id, label=source_app_name, color='lime')
+            G.add_edge(source_app_id, app_id, color='lightgray', label=f'{protocol}')
 
-            if flow == 'INTERNAL':
-                G.add_edge(source_app_id, app_id, color='black', label='Flux interne')
-            else:
-                G.add_edge(source_app_id, app_id, color='gray', label='Flux externe')
 
         if source_app_id == app_id:
             target_app_name = relation['applicationTarget']['appName']
             G.add_node(target_app_id, label=target_app_name, color='skyblue')
-            
-            if flow == 'INTERNAL':
-                G.add_edge(app_id, target_app_id, color='black', label='Flux interne')
-            else:
-                G.add_edge(app_id, target_app_id, color='lightgray', label='Flux externe')
+            G.add_edge(app_id, target_app_id, color='lightgray', label=f'{protocol}')
 
     node_colors = [node[1]['color'] for node in G.nodes(data=True)]
     edge_colors = [edge[2]['color'] for edge in G.edges(data=True)]
